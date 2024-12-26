@@ -110,12 +110,17 @@ elif selected == "Tambah Data":
                 positive_words = Counter(positive_text.split()).most_common(15)
                 negative_words = Counter(negative_text.split()).most_common(15)
 
-                # Menampilkan tabel kata paling sering digunakan
-                st.write("**15 Kata Paling Sering Muncul pada Sentimen Positif**")
-                st.dataframe(pd.DataFrame(positive_words, columns=["Kata", "Frekuensi"]))
+                # Membuat tabel kata positif dan negatif
+                combined_words = pd.DataFrame({
+                    "Kata (Positif)": [word[0] for word in positive_words],
+                    "Frekuensi (Positif)": [word[1] for word in positive_words],
+                    "Kata (Negatif)": [word[0] for word in negative_words],
+                    "Frekuensi (Negatif)": [word[1] for word in negative_words],
+                })
 
-                st.write("**15 Kata Paling Sering Muncul pada Sentimen Negatif**")
-                st.dataframe(pd.DataFrame(negative_words, columns=["Kata", "Frekuensi"]))
+                # Menampilkan tabel kata paling sering digunakan
+                st.write("*15 Kata Paling Sering Muncul*")
+                st.dataframe(combined_words)
 
                 # Visualisasi jumlah sentimen
                 st.markdown("### Visualisasi Jumlah Sentimen")
