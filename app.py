@@ -28,7 +28,7 @@ st.set_page_config(
 with st.sidebar:
     selected = option_menu(
         "Analisis Sentimen",  # Judul Sidebar
-        ["Home", "Tambah Data", "Klasifikasi", "Prediksi"],  # Menu
+        ["Home", "Tambah Data", "Pemodelan", "Prediksi"],  # Menu
         icons=["house", "file-earmark-plus", "gear", "bar-chart"],  # Ikon
         menu_icon="menu-button",  
         default_index=0,  # Menu default yang dipilih
@@ -171,12 +171,14 @@ elif selected == "Tambah Data":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
-# Halaman Klasifikasi
-elif selected == "Klasifikasi":
-    header("Klasifikasi Data", "Evaluasi Model untuk Klasifikasi Sentimen")
+# Halaman Pemodelan
+elif selected == "Pemodelan":
+    header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
     
+    # Memeriksa apakah data sudah ada
     if st.session_state.data is None:
         st.warning("Silakan tambahkan data terlebih dahulu di halaman 'Tambah Data'.")
+        st.stop()  # Menghentikan proses lebih lanjut jika data belum ada
     else:
         st.write("Pratinjau Data:")
         st.dataframe(st.session_state.data.head())
@@ -184,6 +186,7 @@ elif selected == "Klasifikasi":
         # Memeriksa kolom 'Review Text' dan 'Sentiment' untuk melanjutkan
         if 'Review Text' not in st.session_state.data.columns or 'Sentiment' not in st.session_state.data.columns:
             st.error("Data harus memiliki kolom 'Review Text' dan 'Sentiment'.")
+            st.stop()  # Menghentikan proses lebih lanjut jika kolom yang dibutuhkan tidak ada
         else:
             st.write("**Proses Vectorization (TF-IDF):**")
             from sklearn.feature_extraction.text import TfidfVectorizer
@@ -286,7 +289,6 @@ elif selected == "Klasifikasi":
                     file_name="evaluation_results.csv",
                     mime="text/csv"
                 )
-
 
 # Halaman Prediksi
 elif selected == "Prediksi":
