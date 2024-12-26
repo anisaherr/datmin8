@@ -79,7 +79,6 @@ if selected == "Home":
     st.write("3. Bintang Nuari")
 
 # Halaman Tambah Data
-# Halaman Tambah Data
 elif selected == "Tambah Data":
     header("Tambah Data", "Unggah dataset untuk memulai analisis.")
     uploaded_file = st.file_uploader("Unggah file CSV", type="csv")
@@ -94,19 +93,50 @@ elif selected == "Tambah Data":
             st.write("Pratinjau Data:")
             st.dataframe(data.head())
             
-            # Membuat visualisasi Word Cloud jika data memiliki kolom yang sesuai
+            # Memastikan kolom Review Text dan Sentiment ada di data
             if 'Review Text' in data.columns and 'Sentiment' in data.columns:
-                st.markdown("### Visualisasi Word Cloud")
+                st.markdown("### Statistik Kata dan Sentimen")
 
                 # Memisahkan data berdasarkan sentimen
                 positive_reviews = data[data['Sentiment'] == 1]['Review Text']
                 negative_reviews = data[data['Sentiment'] == 0]['Review Text']
 
-                # Menggabungkan list kata menjadi string untuk Word Cloud
+                # Menggabungkan list kata menjadi satu string untuk analisis
                 positive_text = " ".join([" ".join(eval(review)) if isinstance(review, str) else " ".join(review) for review in positive_reviews])
                 negative_text = " ".join([" ".join(eval(review)) if isinstance(review, str) else " ".join(review) for review in negative_reviews])
 
-                # Membuat Word Cloud
+                # Menghitung kata paling sering muncul
+                from collections import Counter
+                positive_words = Counter(positive_text.split()).most_common(15)
+                negative_words = Counter(negative_text.split()).most_common(15)
+
+                # Menampilkan tabel kata paling sering digunakan
+                st.write("**15 Kata Paling Sering Muncul pada Sentimen Positif**")
+                st.table(pd.DataFrame(positive_words, columns=["Kata", "Frekuensi"]))
+
+                st.write("**15 Kata Paling Sering Muncul pada Sentimen Negatif**")
+                st.table(pd.DataFrame(negative_words, columns=["Kata", "Frekuensi"]))
+
+                # Visualisasi jumlah sentimen
+                st.markdown("### Visualisasi Jumlah Sentimen")
+                sentiment_counts = data['Sentiment'].value_counts()
+                sentiment_labels = ['Negatif', 'Positif']
+                sentiment_values = [sentiment_counts.get(0, 0), sentiment_counts.get(1, 0)]
+
+                # Plot bar chart
+                import matplotlib.pyplot as plt
+
+                fig, ax = plt.subplots(figsize=(8, 6))
+                ax.bar(sentiment_labels, sentiment_values, color=['red', 'green'], alpha=0.8)
+                ax.set_title("Jumlah Sentimen Positif dan Negatif", fontsize=16)
+                ax.set_xlabel("Sentimen", fontsize=14)
+                ax.set_ylabel("Jumlah", fontsize=14)
+                for i, v in enumerate(sentiment_values):
+                    ax.text(i, v + 2, str(v), ha='center', fontsize=12, color='black')
+                st.pyplot(fig)
+
+                # Membuat visualisasi Word Cloud
+                st.markdown("### Visualisasi Word Cloud")
                 from wordcloud import WordCloud
 
                 wordcloud_positive = WordCloud(
@@ -118,8 +148,6 @@ elif selected == "Tambah Data":
                 ).generate(negative_text)
 
                 # Menampilkan Word Cloud secara sejajar
-                import matplotlib.pyplot as plt
-
                 fig, ax = plt.subplots(1, 2, figsize=(15, 7))
 
                 # Word Cloud Positif
@@ -134,10 +162,10 @@ elif selected == "Tambah Data":
 
                 st.pyplot(fig)
             else:
-                st.warning("Data harus memiliki kolom 'Review Text' dan 'Sentiment' untuk membuat Word Cloud.")
+                st.warning("Data harus memiliki kolom 'Review Text' dan 'Sentiment'.")
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
-
+            
 # Halaman Klasifikasi
 elif selected == "Klasifikasi":
     header("Klasifikasi Data", "Evaluasi Model untuk Klasifikasi Sentimen")
