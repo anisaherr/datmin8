@@ -227,8 +227,8 @@ elif selected == "Prediksi":
                 model, vectorizer = load_model_and_vectorizer(uploaded_model_file, uploaded_vectorizer_file)
 
                 if model is not None and vectorizer is not None:
-                    # Proses teks (misalnya case folding, dll)
-                    processed_input = user_input.lower()  # Sesuaikan dengan preprocessing yang dibutuhkan
+                    # Proses teks
+                    processed_input = user_input.lower() 
 
                     # Vektorisasi teks, pastikan input dalam bentuk array 2D
                     input_tfidf = vectorizer.transform([processed_input])  # Input harus dalam bentuk list (2D array)
@@ -243,7 +243,7 @@ elif selected == "Prediksi":
                     # Menampilkan hasil prediksi dengan warna
                     st.markdown(
                         f"""
-                        <div style="text-align: center; font-size: 20px; font-weight: bold; color: {color};">
+                        <div style="text-align: center; font-size: 30px; font-weight: bold; color: {color};">
                             Hasil Prediksi: {sentiment}
                         </div>
                         """,
