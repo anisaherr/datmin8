@@ -79,8 +79,9 @@ if selected == "Home":
     st.write("3. Bintang Nuari")
 
 # Halaman Tambah Data
+# Halaman Tambah Data
 elif selected == "Tambah Data":
-    header("Tambah Data", "Unggah Dataset untuk Memulai Analisis")
+    header("Tambah Data", "Unggah dataset untuk memulai analisis.")
     uploaded_file = st.file_uploader("Unggah file CSV", type="csv")
     if uploaded_file:
         try:
@@ -98,19 +99,23 @@ elif selected == "Tambah Data":
                 st.markdown("### Visualisasi Word Cloud")
 
                 # Memisahkan data berdasarkan sentimen
-                positive_reviews = " ".join(data[data['Sentiment'] == 1]['Review Text'].astype(str))
-                negative_reviews = " ".join(data[data['Sentiment'] == 0]['Review Text'].astype(str))
+                positive_reviews = data[data['Sentiment'] == 1]['Review Text']
+                negative_reviews = data[data['Sentiment'] == 0]['Review Text']
+
+                # Menggabungkan list kata menjadi string untuk Word Cloud
+                positive_text = " ".join([" ".join(eval(review)) if isinstance(review, str) else " ".join(review) for review in positive_reviews])
+                negative_text = " ".join([" ".join(eval(review)) if isinstance(review, str) else " ".join(review) for review in negative_reviews])
 
                 # Membuat Word Cloud
                 from wordcloud import WordCloud
 
                 wordcloud_positive = WordCloud(
                     width=500, height=500, background_color='white'
-                ).generate(positive_reviews)
+                ).generate(positive_text)
 
                 wordcloud_negative = WordCloud(
-                    width=500, height=500, background_color='white'
-                ).generate(negative_reviews)
+                    width=500, height=500, background_color='black'
+                ).generate(negative_text)
 
                 # Menampilkan Word Cloud secara sejajar
                 import matplotlib.pyplot as plt
