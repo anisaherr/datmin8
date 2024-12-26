@@ -11,9 +11,6 @@ from streamlit_option_menu import option_menu
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
 
-# Inisialisasi model analisis sentimen
-sentiment_analyzer = pipeline("sentiment-analysis")
-
 # Atur layout halaman
 st.set_page_config(
     page_title="Sentiment Analysis App",
