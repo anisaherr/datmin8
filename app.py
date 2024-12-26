@@ -171,8 +171,6 @@ elif selected == "Tambah Data":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
-import joblib  # Untuk menyimpan model dan vectorizer
-
 # Halaman Pemodelan
 elif selected == "Pemodelan":
     header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
