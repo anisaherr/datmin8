@@ -1,13 +1,17 @@
-# Import Modul Standar
+# Modul Standar
+re
+joblib
 pandas
 
-# Import Modul Eksternal
+# Modul Eksternal
 streamlit
 streamlit-option-menu
 nltk
 transformers
-joblib
+matplotlib
 
-# Import Modul Pustaka Bahasa Indonesia
+# Pustaka Bahasa Indonesia
 Sastrawi
 
+# Modul Pembelajaran Mesin
+scikit-learn
