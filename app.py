@@ -7,7 +7,6 @@ import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
 from nltk.tokenize import word_tokenize
-from nltk import pos_tag
 from transformers import pipeline
 
 # Import Modul Pustaka Bahasa Indonesia
