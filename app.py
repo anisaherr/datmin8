@@ -6,8 +6,6 @@ import pandas as pd
 # Import Modul Eksternal
 import streamlit as st
 from streamlit_option_menu import option_menu
-from nltk.tokenize import word_tokenize
-from transformers import pipeline
 
 # Import Modul Pustaka Bahasa Indonesia
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
@@ -82,7 +80,7 @@ elif selected == "Preprocessing":
         st.write("Pratinjau Data:")
         st.dataframe(st.session_state.data.head())
 
-        # Preprocessing contoh
+        # Preprocessing
         st.write("**Proses Preprocessing:**")
         data = st.session_state.data.copy()
         data['Review Text'] = data['Review Text'].str.lower()
@@ -111,30 +109,8 @@ elif selected == "Preprocessing":
         data['Review Text'] = data['Review Text'].apply(lambda x: emoji_pattern.sub(r'', str(x)))
         st.write("5. Penghapusan emoji selesai.")
 
-        # Tokenisasi
-        data['Tokens'] = data['Review Text'].apply(word_tokenize)
-        st.write("6. Tokenisasi selesai.")
-
-        # Stopword Removal
-        stopword_factory = StopWordRemoverFactory()
-        stopword_remover = stopword_factory.create_stop_word_remover()
-        data['Tokens'] = data['Tokens'].apply(
-                    lambda x: [word for word in x if word not in stopword_factory.get_stop_words()]
-                )
-        st.write("7. Penghapusan stopword selesai.")
-
-        # Stemming
-        stemmer_factory = StemmerFactory()
-        stemmer = stemmer_factory.create_stemmer()
-        data['Tokens'] = data['Tokens'].apply(lambda x: [stemmer.stem(word) for word in x])
-        st.write("8. Stemming selesai.")
-
-        # POS Tagging
-        data['POS Tagged'] = data['Tokens'].apply(pos_tag)
-        st.write("9. POS Tagging selesai.")
-
         # Tampilkan hasil
-        st.write("Hasil Preprocessing dan POS Tagging:")
+        st.write("Hasil Preprocessing")
         st.dataframe(data.head())
 
         # Simpan hasil dan beri opsi unduh
