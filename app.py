@@ -7,6 +7,16 @@ import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
 
+# Fungsi untuk memuat model dan vectorizer dari file yang diupload
+def load_model_and_vectorizer(model_file, vectorizer_file):
+    try:
+        model = joblib.load(model_file)
+        vectorizer = joblib.load(vectorizer_file)
+        return model, vectorizer
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat memuat model dan vectorizer: {e}")
+        return None, None
+        
 # Atur layout halaman
 st.set_page_config(
     page_title="Sentiment Analysis App",
@@ -82,7 +92,6 @@ elif selected == "Tambah Data":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
-# Halaman Klasifikasi
 # Halaman Klasifikasi
 elif selected == "Klasifikasi":
     header("Klasifikasi Data", "Evaluasi model untuk klasifikasi sentimen.")
@@ -202,51 +211,38 @@ elif selected == "Klasifikasi":
 
 # Halaman Prediksi
 elif selected == "Prediksi":
-    header("Prediksi", "Gunakan model yang diunggah untuk analisis sentimen pada teks baru")
+     header("Prediksi", "Gunakan model yang diunggah untuk analisis sentimen pada teks baru")
 
-    # Unggah file model .pkl
+    # Input untuk mengupload model dan vectorizer
     uploaded_model_file = st.file_uploader("Pilih file model (.pkl)", type="pkl")
-    
-    # Inisialisasi model
-    model = None
-    vectorizer = None  # Pastikan ini jika menggunakan vectorizer seperti TfidfVectorizer
-    
-    if uploaded_model_file is not None:
-        try:
-            model = joblib.load(uploaded_model_file)
-            st.success("Model berhasil dimuat!")
-            # Jika model membutuhkan vektorisasi, pastikan juga memuat vectorizer yang digunakan untuk pelatihan
-            vectorizer_file = uploaded_model_file.name.replace('.pkl', '_vectorizer.pkl')
-            try:
-                vectorizer = joblib.load(vectorizer_file)
-                st.success("Vectorizer berhasil dimuat!")
-            except:
-                st.warning("Vectorizer tidak ditemukan atau tidak digunakan.")
-        except Exception as e:
-            st.error(f"Terjadi kesalahan saat memuat model: {e}")
-    
+    uploaded_vectorizer_file = st.file_uploader("Pilih file vectorizer (.pkl)", type="pkl")
+
     # Input teks untuk prediksi
     user_input = st.text_area("Masukkan teks untuk prediksi:")
-    
+
     if st.button("Prediksi"):
-        if model is None:
-            st.warning("Harap unggah file model terlebih dahulu.")
-        elif not user_input:
-            st.warning("Harap masukkan teks untuk dianalisis.")
+        if uploaded_model_file and uploaded_vectorizer_file:
+            if user_input:
+                # Memuat model dan vectorizer dari file yang diupload
+                model, vectorizer = load_model_and_vectorizer(uploaded_model_file, uploaded_vectorizer_file)
+
+                if model is not None and vectorizer is not None:
+                    # Proses teks (misalnya case folding, dll)
+                    processed_input = user_input.lower()  # Sesuaikan dengan preprocessing yang dibutuhkan
+
+                    # Vektorisasi teks, pastikan input dalam bentuk array 2D
+                    input_tfidf = vectorizer.transform([processed_input])  # Input harus dalam bentuk list (2D array)
+
+                    # Prediksi menggunakan model
+                    prediction = model.predict(input_tfidf)
+
+                    # Menampilkan hasil prediksi
+                    sentiment = 'Positif' if prediction[0] == 1 else 'Negatif'
+                    st.success(f"Hasil Prediksi: {sentiment}")
+            else:
+                st.warning("Harap masukkan teks untuk dianalisis.")
         else:
-            try:
-                # Preprocessing teks (misalnya, case folding)
-                processed_input = user_input.lower()  # Sesuaikan dengan preprocessing yang diperlukan
-
-                # Jika model menggunakan vektorisasi, transformasikan teks input
-                if vectorizer:
-                    processed_input = vectorizer.transform([processed_input])  # Vektorisasi teks
-
-                # Lakukan prediksi menggunakan model
-                prediction = model.predict(processed_input)
-                st.success(f"Hasil Prediksi: {prediction[0]}")
-            except Exception as e:
-                st.error(f"Terjadi kesalahan saat melakukan prediksi: {e}")
+            st.warning("Harap unggah file model dan vectorizer terlebih dahulu.")
 
 # Footer
 st.markdown(
