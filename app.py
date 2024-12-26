@@ -7,16 +7,6 @@ import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
-from sklearn.svm import SVC  
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
-import matplotlib.pyplot as plt
-import os
-
 # Fungsi untuk memuat model dan vectorizer dari file yang diupload
 def load_model_and_vectorizer(model_file, vectorizer_file):
     try:
@@ -183,7 +173,7 @@ elif selected == "Tambah Data":
 
 # Halaman Pemodelan
 elif selected == "Pemodelan":
-    st.header("Pemodelan - Evaluasi Model untuk Analisis Sentimen")
+    header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
     
     # Memastikan st.session_state.data ada
     if 'data' not in st.session_state or st.session_state.data is None:
@@ -199,20 +189,27 @@ elif selected == "Pemodelan":
             st.stop()  # Menghentikan proses lebih lanjut jika kolom yang dibutuhkan tidak ada
         else:
             st.write("**Proses Vectorization (TF-IDF):**")
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.model_selection import train_test_split
+            from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+            from sklearn.svm import SVC
+            from sklearn.neighbors import KNeighborsClassifier
+            from sklearn.ensemble import RandomForestClassifier
+            from sklearn.naive_bayes import MultinomialNB
+            import matplotlib.pyplot as plt
 
-            # Menyimpan pilihan model di session_state jika belum ada
-            if 'selected_models' not in st.session_state:
-                st.session_state.selected_models = ["SVM", "Random Forest"]  # Default pilihan
+            # TF-IDF Vectorization
+            vectorizer = TfidfVectorizer()
+            X = vectorizer.fit_transform(st.session_state.data['Review Text'].astype(str))
+            y = st.session_state.data['Sentiment']
 
-            # Dropdown untuk memilih model
+            # Pilih model untuk dievaluasi
+            st.write("**Pilih Model untuk Evaluasi:**")
             selected_models = st.multiselect(
                 "Pilih model yang akan diuji",
                 ["SVM", "KNN", "Random Forest", "Naive Bayes"],
-                default=st.session_state.selected_models  # Memuat pilihan yang disimpan
+                default=["SVM", "Random Forest"]
             )
-
-            # Menyimpan pilihan kembali ke session_state setelah dipilih
-            st.session_state.selected_models = selected_models
 
             # Pilih proporsi data train:test
             st.write("**Pilih Proporsi Train:Test:**")
@@ -303,46 +300,6 @@ elif selected == "Pemodelan":
                         if i + j < len(cm_figures):  # Memastikan tidak melebihi jumlah gambar
                             with cols[j]:
                                 st.pyplot(cm_figures[i + j])
-
-                # Opsi untuk memilih model dan vectorizer untuk disimpan
-                st.write("**Simpan Model dan Vectorizer:**")
-                
-                # Pilihan model yang ingin disimpan
-                model_to_save = st.selectbox(
-                    "Pilih model untuk disimpan",
-                    options=selected_models,
-                    index=0  # Default pilihan pertama
-                )
-
-                if st.button("Simpan Model dan Vectorizer"):
-                    # Menyimpan model terpilih dan vectorizer
-                    model_filename = f"{model_to_save}_model.pkl"
-                    vectorizer_filename = "vectorizer.pkl"
-                    
-                    # Simpan model
-                    joblib.dump(fitted_models[model_to_save], model_filename)
-                    # Simpan vectorizer
-                    joblib.dump(vectorizer, vectorizer_filename)
-
-                    # Menyediakan tombol untuk mengunduh file .pkl
-                    if os.path.exists(model_filename) and os.path.exists(vectorizer_filename):
-                        with open(model_filename, "rb") as f:
-                            st.download_button(
-                                label=f"Unduh {model_to_save} Model (.pkl)",
-                                data=f,
-                                file_name=model_filename,
-                                mime="application/octet-stream"
-                            )
-
-                        with open(vectorizer_filename, "rb") as f:
-                            st.download_button(
-                                label="Unduh Vectorizer (.pkl)",
-                                data=f,
-                                file_name=vectorizer_filename,
-                                mime="application/octet-stream"
-                            )
-                    else:
-                        st.error("Gagal menyimpan file model atau vectorizer.")
 
 # Halaman Prediksi
 elif selected == "Prediksi":
