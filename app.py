@@ -112,10 +112,10 @@ elif selected == "Tambah Data":
 
                 # Menampilkan tabel kata paling sering digunakan
                 st.write("**15 Kata Paling Sering Muncul pada Sentimen Positif**")
-                st.table(pd.DataFrame(positive_words, columns=["Kata", "Frekuensi"]))
+                st.dataframe(pd.DataFrame(positive_words, columns=["Kata", "Frekuensi"]))
 
                 st.write("**15 Kata Paling Sering Muncul pada Sentimen Negatif**")
-                st.table(pd.DataFrame(negative_words, columns=["Kata", "Frekuensi"]))
+                st.dataframe(pd.DataFrame(negative_words, columns=["Kata", "Frekuensi"]))
 
                 # Visualisasi jumlah sentimen
                 st.markdown("### Visualisasi Jumlah Sentimen")
@@ -165,7 +165,7 @@ elif selected == "Tambah Data":
                 st.warning("Data harus memiliki kolom 'Review Text' dan 'Sentiment'.")
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
-            
+
 # Halaman Klasifikasi
 elif selected == "Klasifikasi":
     header("Klasifikasi Data", "Evaluasi Model untuk Klasifikasi Sentimen")
