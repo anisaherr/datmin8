@@ -171,6 +171,8 @@ elif selected == "Tambah Data":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
+import joblib  # Untuk menyimpan model dan vectorizer
+
 # Halaman Pemodelan
 elif selected == "Pemodelan":
     header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
@@ -242,6 +244,7 @@ elif selected == "Pemodelan":
                 }
 
                 cm_figures = []  # List untuk menyimpan gambar Confusion Matrix
+                fitted_models = {}  # Untuk menyimpan model yang sudah dilatih
 
                 for model_name in selected_models:
                     model = model_dict[model_name]
@@ -252,6 +255,9 @@ elif selected == "Pemodelan":
                         # Melatih model
                         model.fit(X_train, y_train)
                         y_pred = model.predict(X_test)
+
+                        # Simpan model yang sudah dilatih
+                        fitted_models[model_name] = model
 
                         # Menghitung metrik evaluasi
                         accuracy = accuracy_score(y_test, y_pred)
@@ -269,11 +275,15 @@ elif selected == "Pemodelan":
                         results['Recall'].append(recall)
                         results['F1-Score'].append(f1)
 
-                        # Simpan confusion matrix ke list
+                        # Simpan confusion matrix ke list dengan judul
                         cm = confusion_matrix(y_test, y_pred)
                         cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "Positif"])
                         fig, ax = plt.subplots(figsize=(6, 5))
                         cm_display.plot(ax=ax, cmap=plt.cm.Blues)
+
+                        # Menambahkan title dengan informasi model dan split
+                        ax.set_title(f"{model_name} - Split {split_ratio}")
+
                         cm_figures.append(fig)
 
                 # Menampilkan hasil evaluasi
@@ -293,14 +303,42 @@ elif selected == "Pemodelan":
                             with cols[j]:
                                 st.pyplot(cm_figures[i + j])
 
-                # Opsi untuk mengunduh hasil evaluasi
-                st.write("**Unduh Hasil Evaluasi:**")
-                csv_data = df_results.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="Unduh CSV",
-                    data=csv_data,
-                    file_name="evaluation_results.csv",
-                    mime="text/csv"
+                # Opsi untuk memilih model dan vectorizer untuk disimpan
+                st.write("**Simpan Model dan Vectorizer:**")
+                
+                # Pilihan model yang ingin disimpan
+                model_to_save = st.selectbox(
+                    "Pilih model untuk disimpan",
+                    options=selected_models,
+                    index=0  # Default pilihan pertama
+                )
+
+                if st.button("Simpan Model dan Vectorizer"):
+                    # Menyimpan model terpilih dan vectorizer
+                    model_filename = f"{model_to_save}_model.pkl"
+                    vectorizer_filename = "vectorizer.pkl"
+                    
+                    # Simpan model
+                    joblib.dump(fitted_models[model_to_save], model_filename)
+                    # Simpan vectorizer
+                    joblib.dump(vectorizer, vectorizer_filename)
+
+                    # Menyediakan tombol untuk mengunduh file .pkl
+                    with open(model_filename, "rb") as f:
+                        st.download_button(
+                            label=f"Unduh {model_to_save} Model (.pkl)",
+                            data=f,
+                            file_name=model_filename,
+                            mime="application/octet-stream"
+                        )
+
+                    with open(vectorizer_filename, "rb") as f:
+                        st.download_button(
+                            label="Unduh Vectorizer (.pkl)",
+                            data=f,
+                            file_name=vectorizer_filename,
+                            mime="application/octet-stream"
+                        )
                 )
 
 # Halaman Prediksi
