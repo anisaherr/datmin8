@@ -73,14 +73,14 @@ def header(title, subtitle):
 # Halaman Home
 if selected == "Home":
     header("Analisis Sentimen Kelompok 8", "Final Project Mata Kuliah Data Mining")
-    st.write("Anggota Kelompok:")
+    st.write("**Anggota Kelompok:**")
     st.write("1. Byanca Rebecca")
     st.write("2. Anisah Herian")
     st.write("3. Bintang Nuari")
 
 # Halaman Tambah Data
 elif selected == "Tambah Data":
-    header("Tambah Data", "Unggah dataset untuk memulai analisis.")
+    header("Tambah Data", "Unggah Dataset untuk Memulai Analisis")
     uploaded_file = st.file_uploader("Unggah file CSV", type="csv")
     if uploaded_file:
         try:
