@@ -236,9 +236,19 @@ elif selected == "Prediksi":
                     # Prediksi menggunakan model
                     prediction = model.predict(input_tfidf)
 
-                    # Menampilkan hasil prediksi
+                    # Menentukan warna berdasarkan hasil prediksi
                     sentiment = 'Positif' if prediction[0] == 1 else 'Negatif'
-                    st.success(f"Hasil Prediksi: {sentiment}")
+                    color = 'green' if prediction[0] == 1 else 'red'
+
+                    # Menampilkan hasil prediksi dengan warna
+                    st.markdown(
+                        f"""
+                        <div style="text-align: center; font-size: 20px; font-weight: bold; color: {color};">
+                            Hasil Prediksi: {sentiment}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
             else:
                 st.warning("Harap masukkan teks untuk dianalisis.")
         else:
