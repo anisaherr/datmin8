@@ -171,6 +171,16 @@ elif selected == "Tambah Data":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.svm import SVC  # Correct import for Support Vector Classifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
+import matplotlib.pyplot as plt
+import os
+
 # Halaman Pemodelan
 elif selected == "Pemodelan":
     st.header("Pemodelan - Evaluasi Model untuk Analisis Sentimen")
