@@ -171,12 +171,16 @@ elif selected == "Tambah Data":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
-# Halaman Klasifikasi
+import joblib  # Untuk menyimpan model dan vectorizer
+
+# Halaman Pemodelan
 elif selected == "Pemodelan":
     header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
     
-    if st.session_state.data is None:
+    # Memastikan st.session_state.data ada
+    if 'data' not in st.session_state or st.session_state.data is None:
         st.warning("Silakan tambahkan data terlebih dahulu di halaman 'Tambah Data'.")
+        st.stop()  # Menghentikan proses lebih lanjut jika data belum ada
     else:
         st.write("Pratinjau Data:")
         st.dataframe(st.session_state.data.head())
@@ -184,163 +188,7 @@ elif selected == "Pemodelan":
         # Memeriksa kolom 'Review Text' dan 'Sentiment' untuk melanjutkan
         if 'Review Text' not in st.session_state.data.columns or 'Sentiment' not in st.session_state.data.columns:
             st.error("Data harus memiliki kolom 'Review Text' dan 'Sentiment'.")
-        else:
-            st.write("**Proses Vectorization (TF-IDF):**")
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            from sklearn.model_selection import train_test_split
-            from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
-            from sklearn.svm import SVC
-            from sklearn.neighbors import KNeighborsClassifier
-            from sklearn.ensemble import RandomForestClassifier
-            from sklearn.naive_bayes import MultinomialNB
-            import matplotlib.pyplot as plt
-
-            # TF-IDF Vectorization
-            vectorizer = TfidfVectorizer()
-            X = vectorizer.fit_transform(st.session_state.data['Review Text'].astype(str))
-            y = st.session_state.data['Sentiment']
-
-            # Pilih model untuk dievaluasi
-            st.write("**Pilih Model untuk Evaluasi:**")
-            selected_models = st.multiselect(
-                "Pilih model yang akan diuji",
-                ["SVM", "KNN", "Random Forest", "Naive Bayes"],
-                default=["SVM", "Random Forest"]
-            )
-
-            # Pilih proporsi data train:test
-            st.write("**Pilih Proporsi Train:Test:**")
-            test_sizes = st.multiselect(
-                "Pilih proporsi data uji (%)",
-                options=[10, 20, 30, 40, 50],
-                default=[20]
-            )
-
-            # Tombol untuk memulai evaluasi
-            start_button = st.button("Mulai Evaluasi Model")
-
-            if start_button:
-                # Dictionary hasil evaluasi
-                results = {
-                    'Model': [],
-                    'Split': [],
-                    'Train Size': [],
-                    'Test Size': [],
-                    'Accuracy': [],
-                    'Precision': [],
-                    'Recall': [],
-                    'F1-Score': []
-                }
-
-                # Inisialisasi model yang dipilih
-                model_dict = {
-                    "SVM": SVC(),
-                    "KNN": KNeighborsClassifier(),
-                    "Random Forest": RandomForestClassifier(random_state=42),
-                    "Naive Bayes": MultinomialNB()
-                }
-
-                # Menyimpan model hasil evaluasi
-                fitted_models = {}
-
-                for model_name in selected_models:
-                    model = model_dict[model_name]
-                    for test_size in test_sizes:
-                        split_ratio = f"{100 - test_size}:{test_size}"
-                        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size / 100, random_state=42)
-
-                        # Melatih model
-                        model.fit(X_train, y_train)
-                        y_pred = model.predict(X_test)
-
-                        # Menghitung metrik evaluasi
-                        accuracy = accuracy_score(y_test, y_pred)
-                        precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
-                        recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
-                        f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
-
-                        # Simpan hasil evaluasi
-                        results['Model'].append(model_name)
-                        results['Split'].append(split_ratio)
-                        results['Train Size'].append(X_train.shape[0])
-                        results['Test Size'].append(X_test.shape[0])
-                        results['Accuracy'].append(accuracy)
-                        results['Precision'].append(precision)
-                        results['Recall'].append(recall)
-                        results['F1-Score'].append(f1)
-
-                        # Simpan model yang telah dilatih
-                        fitted_models[model_name] = model
-
-                # Menampilkan hasil evaluasi
-                st.write("**Hasil Evaluasi Model:**")
-                df_results = pd.DataFrame(results)
-                st.dataframe(df_results)
-
-                # Menampilkan Confusion Matrix untuk setiap model yang diuji
-                st.write("**Confusion Matrix untuk Setiap Model:**")
-                fig, axes = plt.subplots(len(selected_models), len(test_sizes), figsize=(16, 12))
-                axes = axes.flatten()
-
-                for i, model_name in enumerate(selected_models):
-                    for j, test_size in enumerate(test_sizes):
-                        split_ratio = f"{100 - test_size}:{test_size}"
-                        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size / 100, random_state=42)
-                        model = fitted_models[model_name]
-                        y_pred = model.predict(X_test)
-
-                        # Confusion Matrix
-                        cm = confusion_matrix(y_test, y_pred)
-                        cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "Positif"])
-
-                        ax = axes[i * len(test_sizes) + j]
-                        cm_display.plot(ax=ax, cmap=plt.cm.Blues)
-                        ax.set_title(f"{model_name} - Split {split_ratio}")
-                
-                st.pyplot(fig)
-
-                # Menyediakan tombol untuk mengunduh model yang telah dilatih
-                st.write("**Unduh Model dan Vectorizer:**")
-                for model_name in selected_models:
-                    for test_size in test_sizes:
-                        split_ratio = f"{100 - test_size}:{test_size}"
-                        model_filename = f"{model_name}_model_{split_ratio}.pkl"
-                        vectorizer_filename = "vectorizer.pkl"
-
-                        # Simpan model dan vectorizer
-                        joblib.dump(fitted_models[model_name], model_filename)
-                        joblib.dump(vectorizer, vectorizer_filename)
-
-                        # Menyediakan tombol untuk mengunduh file .pkl
-                        with open(model_filename, "rb") as f:
-                            st.download_button(
-                                label=f"Unduh {model_name} Model ({split_ratio}) (.pkl)",
-                                data=f,
-                                file_name=model_filename,
-                                mime="application/octet-stream"
-                            )
-
-                        with open(vectorizer_filename, "rb") as f:
-                            st.download_button(
-                                label="Unduh Vectorizer (.pkl)",
-                                data=f,
-                                file_name=vectorizer_filename,
-                                mime="application/octet-stream"
-                            )
-
- # Halaman Klasifikasi
-elif selected == "Pemodelan":
-    header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
-    
-    if st.session_state.data is None:
-        st.warning("Silakan tambahkan data terlebih dahulu di halaman 'Tambah Data'.")
-    else:
-        st.write("Pratinjau Data:")
-        st.dataframe(st.session_state.data.head())
-
-        # Memeriksa kolom 'Review Text' dan 'Sentiment' untuk melanjutkan
-        if 'Review Text' not in st.session_state.data.columns or 'Sentiment' not in st.session_state.data.columns:
-            st.error("Data harus memiliki kolom 'Review Text' dan 'Sentiment'.")
+            st.stop()  # Menghentikan proses lebih lanjut jika kolom yang dibutuhkan tidak ada
         else:
             st.write("**Proses Vectorization (TF-IDF):**")
             from sklearn.feature_extraction.text import TfidfVectorizer
@@ -395,8 +243,8 @@ elif selected == "Pemodelan":
                     "Naive Bayes": MultinomialNB()
                 }
 
-                # Menyimpan model hasil evaluasi
-                fitted_models = {}
+                cm_figures = []  # List untuk menyimpan gambar Confusion Matrix
+                fitted_models = {}  # Untuk menyimpan model yang sudah dilatih
 
                 for model_name in selected_models:
                     model = model_dict[model_name]
@@ -407,6 +255,9 @@ elif selected == "Pemodelan":
                         # Melatih model
                         model.fit(X_train, y_train)
                         y_pred = model.predict(X_test)
+
+                        # Simpan model yang sudah dilatih
+                        fitted_models[model_name] = model
 
                         # Menghitung metrik evaluasi
                         accuracy = accuracy_score(y_test, y_pred)
@@ -424,64 +275,70 @@ elif selected == "Pemodelan":
                         results['Recall'].append(recall)
                         results['F1-Score'].append(f1)
 
-                        # Simpan model yang telah dilatih
-                        fitted_models[model_name] = model
+                        # Simpan confusion matrix ke list dengan judul
+                        cm = confusion_matrix(y_test, y_pred)
+                        cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "Positif"])
+                        fig, ax = plt.subplots(figsize=(6, 5))
+                        cm_display.plot(ax=ax, cmap=plt.cm.Blues)
+
+                        # Menambahkan title dengan informasi model dan split
+                        ax.set_title(f"{model_name} - Split {split_ratio}")
+
+                        cm_figures.append(fig)
 
                 # Menampilkan hasil evaluasi
                 st.write("**Hasil Evaluasi Model:**")
                 df_results = pd.DataFrame(results)
                 st.dataframe(df_results)
 
-                # Menampilkan Confusion Matrix untuk setiap model yang diuji
-                st.write("**Confusion Matrix untuk Setiap Model:**")
-                fig, axes = plt.subplots(len(selected_models), len(test_sizes), figsize=(16, 12))
-                axes = axes.flatten()
-
-                for i, model_name in enumerate(selected_models):
-                    for j, test_size in enumerate(test_sizes):
-                        split_ratio = f"{100 - test_size}:{test_size}"
-                        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size / 100, random_state=42)
-                        model = fitted_models[model_name]
-                        y_pred = model.predict(X_test)
-
-                        # Confusion Matrix
-                        cm = confusion_matrix(y_test, y_pred)
-                        cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "Positif"])
-
-                        ax = axes[i * len(test_sizes) + j]
-                        cm_display.plot(ax=ax, cmap=plt.cm.Blues)
-                        ax.set_title(f"{model_name} - Split {split_ratio}")
+                # Menampilkan semua Confusion Matrix dalam layout grid
+                st.write("**Confusion Matrix untuk Semua Model:**")
                 
-                st.pyplot(fig)
+                # Membuat layout grid untuk menampilkan confusion matrix dalam baris dan kolom
+                num_columns = 2  # Jumlah kolom yang diinginkan (2 per baris)
+                for i in range(0, len(cm_figures), num_columns):
+                    cols = st.columns(num_columns)
+                    for j in range(num_columns):
+                        if i + j < len(cm_figures):  # Memastikan tidak melebihi jumlah gambar
+                            with cols[j]:
+                                st.pyplot(cm_figures[i + j])
 
-                # Menyediakan tombol untuk mengunduh model yang telah dilatih
-                st.write("**Unduh Model dan Vectorizer:**")
-                for model_name in selected_models:
-                    for test_size in test_sizes:
-                        split_ratio = f"{100 - test_size}:{test_size}"
-                        model_filename = f"{model_name}_model_{split_ratio}.pkl"
-                        vectorizer_filename = "vectorizer.pkl"
+                # Opsi untuk memilih model dan vectorizer untuk disimpan
+                st.write("**Simpan Model dan Vectorizer:**")
+                
+                # Pilihan model yang ingin disimpan
+                model_to_save = st.selectbox(
+                    "Pilih model untuk disimpan",
+                    options=selected_models,
+                    index=0  # Default pilihan pertama
+                )
 
-                        # Simpan model dan vectorizer
-                        joblib.dump(fitted_models[model_name], model_filename)
-                        joblib.dump(vectorizer, vectorizer_filename)
+                if st.button("Simpan Model dan Vectorizer"):
+                    # Menyimpan model terpilih dan vectorizer
+                    model_filename = f"{model_to_save}_model.pkl"
+                    vectorizer_filename = "vectorizer.pkl"
+                    
+                    # Simpan model
+                    joblib.dump(fitted_models[model_to_save], model_filename)
+                    # Simpan vectorizer
+                    joblib.dump(vectorizer, vectorizer_filename)
 
-                        # Menyediakan tombol untuk mengunduh file .pkl
-                        with open(model_filename, "rb") as f:
-                            st.download_button(
-                                label=f"Unduh {model_name} Model ({split_ratio}) (.pkl)",
-                                data=f,
-                                file_name=model_filename,
-                                mime="application/octet-stream"
-                            )
+                    # Menyediakan tombol untuk mengunduh file .pkl
+                    with open(model_filename, "rb") as f:
+                        st.download_button(
+                            label=f"Unduh {model_to_save} Model (.pkl)",
+                            data=f,
+                            file_name=model_filename,
+                            mime="application/octet-stream"
+                        )
 
-                        with open(vectorizer_filename, "rb") as f:
-                            st.download_button(
-                                label="Unduh Vectorizer (.pkl)",
-                                data=f,
-                                file_name=vectorizer_filename,
-                                mime="application/octet-stream"
-                            )
+                    with open(vectorizer_filename, "rb") as f:
+                        st.download_button(
+                            label="Unduh Vectorizer (.pkl)",
+                            data=f,
+                            file_name=vectorizer_filename,
+                            mime="application/octet-stream"
+                        )
 
 # Halaman Prediksi
 elif selected == "Prediksi":
