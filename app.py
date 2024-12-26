@@ -211,7 +211,7 @@ elif selected == "Klasifikasi":
 
 # Halaman Prediksi
 elif selected == "Prediksi":
-     header("Prediksi", "Gunakan model yang diunggah untuk analisis sentimen pada teks baru")
+    header("Prediksi", "Gunakan model yang diunggah untuk analisis sentimen pada teks baru")
 
     # Input untuk mengupload model dan vectorizer
     uploaded_model_file = st.file_uploader("Pilih file model (.pkl)", type="pkl")
