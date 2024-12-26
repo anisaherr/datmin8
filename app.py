@@ -290,14 +290,14 @@ elif selected == "Klasifikasi":
 
 # Halaman Prediksi
 elif selected == "Prediksi":
-    header("Prediksi", "Gunakan model yang diunggah untuk analisis sentimen pada teks baru")
+    header("Prediksi", "Gunakan Model untuk Analisis Sentimen")
 
     # Input untuk mengupload model dan vectorizer
     uploaded_model_file = st.file_uploader("Pilih file model (.pkl)", type="pkl")
     uploaded_vectorizer_file = st.file_uploader("Pilih file vectorizer (.pkl)", type="pkl")
 
     # Input teks untuk prediksi
-    user_input = st.text_area("Masukkan teks untuk prediksi:")
+    user_input = st.text_area("Masukkan Teks untuk Analisis:")
 
     if st.button("Prediksi"):
         if uploaded_model_file and uploaded_vectorizer_file:
@@ -329,9 +329,9 @@ elif selected == "Prediksi":
                         unsafe_allow_html=True
                     )
             else:
-                st.warning("Harap masukkan teks untuk dianalisis.")
+                st.warning("Harap Masukkan Teks untuk Dianalisis!")
         else:
-            st.warning("Harap unggah file model dan vectorizer terlebih dahulu.")
+            st.warning("Harap Unggah File Model dan Vectorizer Terlebih Dahulu!")
 
 # Footer
 st.markdown(
