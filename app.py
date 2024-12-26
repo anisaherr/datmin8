@@ -19,13 +19,31 @@ with st.sidebar:
     selected = option_menu(
         "Analisis Sentimen",  # Judul Sidebar
         ["Home", "Tambah Data", "Klasifikasi", "Prediksi"],  # Menu
-        icons=["house", "file-earmark-plus", "gear", "bar-chart", "search", "graph-up-arrow"],  # Ikon
-        menu_icon="menu-button",  # Ikon utama sidebar
+        icons=["house", "file-earmark-plus", "gear", "bar-chart"],  # Ikon
+        menu_icon="menu-button",  
         default_index=0,  # Menu default yang dipilih
         styles={
-            "container": {"padding": "0!important", "background-color": "#2C3E50"},  # Sidebar dark background
-            "nav-link": {"font-size": "14px", "margin": "5px", "color": "#BDC3C7"},  # Light text
-            "nav-link-selected": {"background-color": "#1F2A35", "color": "white"},  # Darker background for selected
+            "container": {
+                "padding": "10px 20px",  # Adjust padding for better spacing
+                "background-color": "#2C3E50",  # Sidebar dark background
+            },  
+            "nav-link": {
+                "font-size": "14px", 
+                "margin": "8px 0",  # Vertical margin for better spacing
+                "color": "#BDC3C7",  # Light text
+                "padding": "8px 16px",  # Padding to make the links clickable and more spacious
+                "border-radius": "5px",  # Optional: rounded corners for the links
+            },  
+            "nav-link-selected": {
+                "background-color": "#1F2A35",  # Darker background for selected
+                "color": "white",  # White text when selected
+                "padding": "8px 16px",  # Maintain consistent padding
+                "border-radius": "5px",  # Optional: rounded corners for the selected link
+            },
+            "menu-icon": {
+                "color": "#BDC3C7",  # Light color for the menu icon
+                "font-size": "20px",  # Slightly larger icon for better visibility
+            }
         },
     )
 
