@@ -80,21 +80,62 @@ if selected == "Home":
 
 # Halaman Tambah Data
 elif selected == "Tambah Data":
-    header("Tambah Data", "Unggah dataset untuk memulai analisis.")
+    header("Tambah Data", "Unggah Dataset untuk Memulai Analisis")
     uploaded_file = st.file_uploader("Unggah file CSV", type="csv")
     if uploaded_file:
         try:
+            # Membaca file CSV
             data = pd.read_csv(uploaded_file)
             st.session_state.data = data
             st.success("File berhasil diunggah!")
+            
+            # Menampilkan pratinjau data
             st.write("Pratinjau Data:")
             st.dataframe(data.head())
+            
+            # Membuat visualisasi Word Cloud jika data memiliki kolom yang sesuai
+            if 'Review Text' in data.columns and 'Sentiment' in data.columns:
+                st.markdown("### Visualisasi Word Cloud")
+
+                # Memisahkan data berdasarkan sentimen
+                positive_reviews = " ".join(data[data['Sentiment'] == 1]['Review Text'].astype(str))
+                negative_reviews = " ".join(data[data['Sentiment'] == 0]['Review Text'].astype(str))
+
+                # Membuat Word Cloud
+                from wordcloud import WordCloud
+
+                wordcloud_positive = WordCloud(
+                    width=500, height=500, background_color='white'
+                ).generate(positive_reviews)
+
+                wordcloud_negative = WordCloud(
+                    width=500, height=500, background_color='black'
+                ).generate(negative_reviews)
+
+                # Menampilkan Word Cloud secara sejajar
+                import matplotlib.pyplot as plt
+
+                fig, ax = plt.subplots(1, 2, figsize=(15, 7))
+
+                # Word Cloud Positif
+                ax[0].imshow(wordcloud_positive, interpolation='bilinear')
+                ax[0].set_title("Word Cloud Positif", fontsize=16)
+                ax[0].axis('off')
+
+                # Word Cloud Negatif
+                ax[1].imshow(wordcloud_negative, interpolation='bilinear')
+                ax[1].set_title("Word Cloud Negatif", fontsize=16)
+                ax[1].axis('off')
+
+                st.pyplot(fig)
+            else:
+                st.warning("Data harus memiliki kolom 'Review Text' dan 'Sentiment' untuk membuat Word Cloud.")
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
 # Halaman Klasifikasi
 elif selected == "Klasifikasi":
-    header("Klasifikasi Data", "Evaluasi model untuk klasifikasi sentimen.")
+    header("Klasifikasi Data", "Evaluasi Model untuk Klasifikasi Sentimen")
     
     if st.session_state.data is None:
         st.warning("Silakan tambahkan data terlebih dahulu di halaman 'Tambah Data'.")
