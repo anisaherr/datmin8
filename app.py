@@ -175,8 +175,8 @@ elif selected == "Tambah Data":
 elif selected == "Pemodelan":
     header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
     
-    # Memeriksa apakah data sudah ada
-    if st.session_state.data is None:
+    # Memastikan st.session_state.data ada
+    if 'data' not in st.session_state or st.session_state.data is None:
         st.warning("Silakan tambahkan data terlebih dahulu di halaman 'Tambah Data'.")
         st.stop()  # Menghentikan proses lebih lanjut jika data belum ada
     else:
