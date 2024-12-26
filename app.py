@@ -241,6 +241,8 @@ elif selected == "Pemodelan":
                     "Naive Bayes": MultinomialNB()
                 }
 
+                cm_figures = []  # List untuk menyimpan gambar Confusion Matrix
+
                 for model_name in selected_models:
                     model = model_dict[model_name]
                     for test_size in test_sizes:
@@ -267,18 +269,29 @@ elif selected == "Pemodelan":
                         results['Recall'].append(recall)
                         results['F1-Score'].append(f1)
 
+                        # Simpan confusion matrix ke list
+                        cm = confusion_matrix(y_test, y_pred)
+                        cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "Positif"])
+                        fig, ax = plt.subplots(figsize=(6, 5))
+                        cm_display.plot(ax=ax, cmap=plt.cm.Blues)
+                        cm_figures.append(fig)
+
                 # Menampilkan hasil evaluasi
                 st.write("**Hasil Evaluasi Model:**")
                 df_results = pd.DataFrame(results)
                 st.dataframe(df_results)
 
-                # Menampilkan Confusion Matrix untuk model terakhir yang diuji
-                st.write(f"**Confusion Matrix untuk Model {model_name} (Split {split_ratio}):**")
-                cm = confusion_matrix(y_test, y_pred)
-                cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "Positif"])
-                fig, ax = plt.subplots(figsize=(8, 6))
-                cm_display.plot(ax=ax, cmap=plt.cm.Blues)
-                st.pyplot(fig)
+                # Menampilkan semua Confusion Matrix dalam layout grid
+                st.write("**Confusion Matrix untuk Semua Model:**")
+                
+                # Membuat layout grid untuk menampilkan confusion matrix dalam baris dan kolom
+                num_columns = 2  # Jumlah kolom yang diinginkan (2 per baris)
+                for i in range(0, len(cm_figures), num_columns):
+                    cols = st.columns(num_columns)
+                    for j in range(num_columns):
+                        if i + j < len(cm_figures):  # Memastikan tidak melebihi jumlah gambar
+                            with cols[j]:
+                                st.pyplot(cm_figures[i + j])
 
                 # Opsi untuk mengunduh hasil evaluasi
                 st.write("**Unduh Hasil Evaluasi:**")
