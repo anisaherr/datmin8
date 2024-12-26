@@ -244,7 +244,7 @@ elif selected == "Prediksi":
                     st.markdown(
                         f"""
                         <div style="text-align: center; font-size: 30px; font-weight: bold; color: {color};">
-                            Hasil Prediksi: {sentiment}
+                            Hasil Sentimen: {sentiment}
                         </div>
                         """,
                         unsafe_allow_html=True
