@@ -7,6 +7,16 @@ import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.svm import SVC  
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
+import matplotlib.pyplot as plt
+import os
+
 # Fungsi untuk memuat model dan vectorizer dari file yang diupload
 def load_model_and_vectorizer(model_file, vectorizer_file):
     try:
@@ -170,16 +180,6 @@ elif selected == "Tambah Data":
                 st.warning("Data harus memiliki kolom 'Review Text' dan 'Sentiment'.")
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
-from sklearn.svm import SVC  # Correct import for Support Vector Classifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.naive_bayes import MultinomialNB
-import matplotlib.pyplot as plt
-import os
 
 # Halaman Pemodelan
 elif selected == "Pemodelan":
