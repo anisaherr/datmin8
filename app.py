@@ -171,10 +171,9 @@ elif selected == "Tambah Data":
         except Exception as e:
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
-
 # Halaman Pemodelan
 elif selected == "Pemodelan":
-    header("Pemodelan", "Evaluasi Model untuk Analisis Sentimen")
+    st.header("Pemodelan - Evaluasi Model untuk Analisis Sentimen")
     
     # Memastikan st.session_state.data ada
     if 'data' not in st.session_state or st.session_state.data is None:
@@ -190,27 +189,20 @@ elif selected == "Pemodelan":
             st.stop()  # Menghentikan proses lebih lanjut jika kolom yang dibutuhkan tidak ada
         else:
             st.write("**Proses Vectorization (TF-IDF):**")
-            from sklearn.feature_extraction.text import TfidfVectorizer
-            from sklearn.model_selection import train_test_split
-            from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
-            from sklearn.svm import SVC
-            from sklearn.neighbors import KNeighborsClassifier
-            from sklearn.ensemble import RandomForestClassifier
-            from sklearn.naive_bayes import MultinomialNB
-            import matplotlib.pyplot as plt
 
-            # TF-IDF Vectorization
-            vectorizer = TfidfVectorizer()
-            X = vectorizer.fit_transform(st.session_state.data['Review Text'].astype(str))
-            y = st.session_state.data['Sentiment']
+            # Menyimpan pilihan model di session_state jika belum ada
+            if 'selected_models' not in st.session_state:
+                st.session_state.selected_models = ["SVM", "Random Forest"]  # Default pilihan
 
-            # Pilih model untuk dievaluasi
-            st.write("**Pilih Model untuk Evaluasi:**")
+            # Dropdown untuk memilih model
             selected_models = st.multiselect(
                 "Pilih model yang akan diuji",
                 ["SVM", "KNN", "Random Forest", "Naive Bayes"],
-                default=["SVM", "Random Forest"]
+                default=st.session_state.selected_models  # Memuat pilihan yang disimpan
             )
+
+            # Menyimpan pilihan kembali ke session_state setelah dipilih
+            st.session_state.selected_models = selected_models
 
             # Pilih proporsi data train:test
             st.write("**Pilih Proporsi Train:Test:**")
@@ -317,13 +309,13 @@ elif selected == "Pemodelan":
                     model_filename = f"{model_to_save}_model.pkl"
                     vectorizer_filename = "vectorizer.pkl"
                     
-                    # Simpan model menggunakan joblib
+                    # Simpan model
                     joblib.dump(fitted_models[model_to_save], model_filename)
+                    # Simpan vectorizer
                     joblib.dump(vectorizer, vectorizer_filename)
-                
-                    # Pastikan file berhasil disimpan sebelum menyediakan tombol download
+
+                    # Menyediakan tombol untuk mengunduh file .pkl
                     if os.path.exists(model_filename) and os.path.exists(vectorizer_filename):
-                        # Menyediakan tombol untuk mengunduh file .pkl
                         with open(model_filename, "rb") as f:
                             st.download_button(
                                 label=f"Unduh {model_to_save} Model (.pkl)",
@@ -331,7 +323,7 @@ elif selected == "Pemodelan":
                                 file_name=model_filename,
                                 mime="application/octet-stream"
                             )
-                
+
                         with open(vectorizer_filename, "rb") as f:
                             st.download_button(
                                 label="Unduh Vectorizer (.pkl)",
