@@ -114,7 +114,7 @@ elif selected == "Tambah Data":
                 ).generate(positive_text)
 
                 wordcloud_negative = WordCloud(
-                    width=500, height=500, background_color='black'
+                    width=500, height=500, background_color='white'
                 ).generate(negative_text)
 
                 # Menampilkan Word Cloud secara sejajar
