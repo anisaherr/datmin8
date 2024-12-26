@@ -83,15 +83,122 @@ elif selected == "Tambah Data":
             st.error(f"Terjadi kesalahan saat memproses file: {e}")
 
 # Halaman Klasifikasi
+# Halaman Klasifikasi
 elif selected == "Klasifikasi":
     header("Klasifikasi Data", "Evaluasi model untuk klasifikasi sentimen.")
+    
     if st.session_state.data is None:
         st.warning("Silakan tambahkan data terlebih dahulu di halaman 'Tambah Data'.")
     else:
         st.write("Pratinjau Data:")
         st.dataframe(st.session_state.data.head())
-        # Placeholder logika klasifikasi
-        st.info("Klasifikasi akan diterapkan di sini.")
+
+        # Memeriksa kolom 'Review Text' dan 'Sentiment' untuk melanjutkan
+        if 'Review Text' not in st.session_state.data.columns or 'Sentiment' not in st.session_state.data.columns:
+            st.error("Data harus memiliki kolom 'Review Text' dan 'Sentiment'.")
+        else:
+            st.write("**Proses Vectorization (TF-IDF):**")
+            from sklearn.feature_extraction.text import TfidfVectorizer
+            from sklearn.model_selection import train_test_split
+            from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+            from sklearn.svm import SVC
+            from sklearn.neighbors import KNeighborsClassifier
+            from sklearn.ensemble import RandomForestClassifier
+            from sklearn.naive_bayes import MultinomialNB
+            import matplotlib.pyplot as plt
+
+            # TF-IDF Vectorization
+            vectorizer = TfidfVectorizer()
+            X = vectorizer.fit_transform(st.session_state.data['Review Text'].astype(str))
+            y = st.session_state.data['Sentiment']
+
+            # Pilih model untuk dievaluasi
+            st.write("**Pilih Model untuk Evaluasi:**")
+            selected_models = st.multiselect(
+                "Pilih model yang akan diuji",
+                ["SVM", "KNN", "Random Forest", "Naive Bayes"],
+                default=["SVM", "Random Forest"]
+            )
+
+            # Pilih proporsi data train:test
+            st.write("**Pilih Proporsi Train:Test:**")
+            test_sizes = st.multiselect(
+                "Pilih proporsi data uji (%)",
+                options=[10, 20, 30, 40, 50],
+                default=[20]
+            )
+
+            # Tombol untuk memulai evaluasi
+            if st.button("Mulai Evaluasi Model"):
+                # Dictionary hasil evaluasi
+                results = {
+                    'Model': [],
+                    'Split': [],
+                    'Train Size': [],
+                    'Test Size': [],
+                    'Accuracy': [],
+                    'Precision': [],
+                    'Recall': [],
+                    'F1-Score': []
+                }
+
+                # Inisialisasi model yang dipilih
+                model_dict = {
+                    "SVM": SVC(),
+                    "KNN": KNeighborsClassifier(),
+                    "Random Forest": RandomForestClassifier(random_state=42),
+                    "Naive Bayes": MultinomialNB()
+                }
+
+                for model_name in selected_models:
+                    model = model_dict[model_name]
+                    for test_size in test_sizes:
+                        split_ratio = f"{100 - test_size}:{test_size}"
+                        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size / 100, random_state=42)
+
+                        # Melatih model
+                        model.fit(X_train, y_train)
+                        y_pred = model.predict(X_test)
+
+                        # Menghitung metrik evaluasi
+                        accuracy = accuracy_score(y_test, y_pred)
+                        precision = precision_score(y_test, y_pred, average='weighted', zero_division=0)
+                        recall = recall_score(y_test, y_pred, average='weighted', zero_division=0)
+                        f1 = f1_score(y_test, y_pred, average='weighted', zero_division=0)
+
+                        # Simpan hasil evaluasi
+                        results['Model'].append(model_name)
+                        results['Split'].append(split_ratio)
+                        results['Train Size'].append(X_train.shape[0])
+                        results['Test Size'].append(X_test.shape[0])
+                        results['Accuracy'].append(accuracy)
+                        results['Precision'].append(precision)
+                        results['Recall'].append(recall)
+                        results['F1-Score'].append(f1)
+
+                # Menampilkan hasil evaluasi
+                st.write("**Hasil Evaluasi Model:**")
+                df_results = pd.DataFrame(results)
+                st.dataframe(df_results)
+
+                # Menampilkan Confusion Matrix untuk model terakhir yang diuji
+                st.write(f"**Confusion Matrix untuk Model {model_name} (Split {split_ratio}):**")
+                cm = confusion_matrix(y_test, y_pred)
+                cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=["Negatif", "Positif"])
+                fig, ax = plt.subplots(figsize=(8, 6))
+                cm_display.plot(ax=ax, cmap=plt.cm.Blues)
+                st.pyplot(fig)
+
+                # Opsi untuk mengunduh hasil evaluasi
+                st.write("**Unduh Hasil Evaluasi:**")
+                csv_data = df_results.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="Unduh CSV",
+                    data=csv_data,
+                    file_name="evaluation_results.csv",
+                    mime="text/csv"
+                )
+
 
 # Halaman Prediksi
 elif selected == "Prediksi":
