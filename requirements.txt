@@ -1,17 +1,8 @@
-# Modul Standar
-re
-joblib
-pandas
-
-# Modul Eksternal
 streamlit
 streamlit-option-menu
 nltk
 transformers
-matplotlib
-
-# Pustaka Bahasa Indonesia
 Sastrawi
-
-# Modul Pembelajaran Mesin
 scikit-learn
+matplotlib
+wordcloud
