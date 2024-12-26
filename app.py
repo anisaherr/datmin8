@@ -258,7 +258,7 @@ elif selected == "Prediksi":
 st.markdown(
     """
     <div style="text-align: center; margin-top: 20px; font-size: small; color: #BDC3C7;">
-        Dibuat dengan ❤️ menggunakan Streamlit
+        Dibuat dengan ❤️ oleh Kelompok 8
     </div>
     """,
     unsafe_allow_html=True,
